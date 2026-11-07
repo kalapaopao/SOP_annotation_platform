@@ -649,12 +649,29 @@ class UltralyticsDialog(QDialog):
             if dir_path:
                 self.config_widgets["data"].setText(dir_path)
         else:
-            file_path, _ = QFileDialog.getOpenFileName(
+            dataset_dir = QFileDialog.getExistingDirectory(
                 self,
-                self.tr("Select Data File"),
+                self.tr("Select Dataset Directory"),
                 "",
-                "Text Files (*.yaml);;All Files (*)",
             )
+            if dataset_dir:
+                candidates = [
+                    os.path.join(dataset_dir, "dataset.yaml"),
+                    os.path.join(dataset_dir, "data.yaml"),
+                ]
+                file_path = next(
+                    (path for path in candidates if os.path.isfile(path)),
+                    "",
+                )
+                if not file_path:
+                    file_path, _ = QFileDialog.getOpenFileName(
+                        self,
+                        self.tr("Select Data File"),
+                        dataset_dir,
+                        "YAML Files (*.yaml *.yml);;All Files (*)",
+                    )
+            else:
+                file_path = ""
             if file_path:
                 is_valid, result = validate_data_file(file_path)
                 if is_valid:

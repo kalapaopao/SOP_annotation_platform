@@ -5,6 +5,8 @@ import pathlib
 import shutil
 import time
 
+import yaml
+
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QCoreApplication, Qt, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -208,6 +210,24 @@ def _get_yolo_export_files(image_list, source_root, save_path):
             )
         )
     return export_files
+
+
+def _write_yolo_dataset_yaml(dataset_dir, classes_file):
+    """Write a self-contained Ultralytics dataset config beside exported data."""
+    with open(classes_file, encoding="utf-8-sig") as stream:
+        names = [line.strip() for line in stream if line.strip()]
+    if not names:
+        raise ValueError("Classes file is empty; cannot create dataset.yaml.")
+    config = {
+        "path": ".",
+        "train": ".",
+        "val": ".",
+        "names": {index: name for index, name in enumerate(names)},
+    }
+    yaml_path = osp.join(dataset_dir, "dataset.yaml")
+    with open(yaml_path, "w", encoding="utf-8") as stream:
+        yaml.safe_dump(config, stream, allow_unicode=True, sort_keys=False)
+    return yaml_path
 
 
 def export_yolo_annotation(self, mode):
@@ -521,6 +541,11 @@ def export_yolo_annotation(self, mode):
 
         current_image_file = None
         progress_dialog.close()
+        dataset_yaml = None
+        if mode == "hbb" and getattr(self, "classes_file", None):
+            dataset_yaml = _write_yolo_dataset_yaml(
+                save_path, self.classes_file
+            )
         template = QCoreApplication.translate(
             "LabelingWidget",
             "Exporting annotations successfully!\n"
@@ -528,6 +553,8 @@ def export_yolo_annotation(self, mode):
             "%s",
         )
         message_text = template % save_path
+        if dataset_yaml:
+            message_text += "\n\nDataset config: " + dataset_yaml
         popup = Popup(
             message_text,
             self,
