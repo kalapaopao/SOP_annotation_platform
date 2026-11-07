@@ -114,6 +114,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv*/
 .idea
 env/
 venv/
@@ -121,6 +122,22 @@ ENV/
 env.bak/
 venv.bak/
 venv-*/
+
+# Local runtime environments and user-specific state
+env*/
+venv*/
+.xanylabelingrc
+
+# Local runtime data, logs, databases and temporary files
+storage/
+logs/
+*.sqlite3
+*.sqlite3-*
+*.log
+*.bak
+*.backup
+*~
+*.swp
 
 # Spyder project settings
 .spyderproject
