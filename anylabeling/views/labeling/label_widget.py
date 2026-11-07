@@ -2228,11 +2228,9 @@ class LabelingWidget(LabelDialog):
             edit=self.menu(self.tr("Edit")),
             view=self.menu(self.tr("View")),
             theme=self.menu(self.tr("Theme")),
-            language=self.menu(self.tr("Language")),
             upload=self.menu(self.tr("Upload")),
             export=self.menu(self.tr("Export")),
             tool=self.menu(self.tr("Tool")),
-            workflow=self.menu(self.tr("Workflow")),
             train=self.menu(self.tr("Train")),
             help=self.menu(self.tr("Help")),
             recent_files=QtWidgets.QMenu(self.tr("Open Recent")),
@@ -2270,17 +2268,6 @@ class LabelingWidget(LabelDialog):
         )
         utils.add_actions(self.menus.train, (ultralytics_train,))
         utils.add_actions(
-            self.menus.workflow,
-            (
-                open_chatbot,
-                open_vqa,
-                open_image_classifier,
-                open_paddleocr,
-                open_video_classifier,
-                open_pointcloud,
-            ),
-        )
-        utils.add_actions(
             self.menus.tool,
             (
                 overview,
@@ -2304,15 +2291,6 @@ class LabelingWidget(LabelDialog):
                 sponsor,
                 None,
                 about,
-            ),
-        )
-        utils.add_actions(
-            self.menus.language,
-            (
-                select_lang_en,
-                select_lang_zh,
-                select_lang_jp,
-                select_lang_ko,
             ),
         )
         utils.add_actions(self.menus.theme, theme_mode_actions)
