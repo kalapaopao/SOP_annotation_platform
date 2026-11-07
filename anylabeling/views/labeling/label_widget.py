@@ -2570,21 +2570,6 @@ class LabelingWidget(LabelDialog):
             }}
         """)
         self.sidebar_toggle_button.clicked.connect(self.toggle_right_sidebar)
-        self.shortcuts_button = QtWidgets.QToolButton()
-        self.shortcuts_button.setIcon(
-            get_icon("command", theme["text"], theme["primary"])
-        )
-        self.shortcuts_button.setIconSize(QtCore.QSize(18, 18))
-        self.shortcuts_button.setFixedSize(26, 26)
-        self.shortcuts_button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.shortcuts_button.setToolTip(self.tr("Shortcuts"))
-        self.shortcuts_button.setAccessibleName(
-            self.shortcuts_button.toolTip()
-        )
-        self.shortcuts_button.setStyleSheet(
-            self.sidebar_toggle_button.styleSheet()
-        )
-        self.shortcuts_button.clicked.connect(self.show_shortcuts)
         self.update_button = QtWidgets.QToolButton()
         self.update_button.setIcon(
             get_icon("circle-arrow-up", theme["primary"], theme["primary"])
@@ -2602,7 +2587,6 @@ class LabelingWidget(LabelDialog):
         utility_actions = []
         for button in (
             self.settings_button,
-            self.shortcuts_button,
             self.sidebar_toggle_button,
         ):
             button.setStyleSheet("")
@@ -2635,9 +2619,9 @@ class LabelingWidget(LabelDialog):
             None,
             *display_actions,
             None,
-            *utility_actions[:2],
+            *utility_actions[:1],
             show_image_tags,
-            *utility_actions[2:],
+            *utility_actions[1:],
         )
         central_layout.addLayout(instruction_layout)
         central_layout.addWidget(self.auto_labeling_widget)
