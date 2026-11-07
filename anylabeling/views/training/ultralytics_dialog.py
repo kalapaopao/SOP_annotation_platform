@@ -2507,6 +2507,16 @@ class UltralyticsDialog(QDialog):
             )
             return
 
+        try:
+            self._generate_weight_model_configs()
+        except (OSError, ValueError) as error:
+            QMessageBox.warning(
+                self,
+                self.tr("Model Config Error"),
+                str(error),
+            )
+            return
+
         export_dialog = ExportFormatDialog(self)
         export_dialog.export_requested.connect(self.start_selected_export)
         export_dialog.stop_requested.connect(self.stop_export)
@@ -2515,6 +2525,45 @@ class UltralyticsDialog(QDialog):
         export_dialog.exec()
         if self.export_dialog is export_dialog:
             self.export_dialog = None
+
+    def _generate_weight_model_configs(self):
+        """Create click-ready X-AnyLabeling configs beside best/last weights."""
+        config = self.get_current_config()
+        data_path = config["basic"].get("data", "").strip()
+        if not data_path:
+            raise ValueError("Training data is not configured.")
+        if os.path.isdir(data_path):
+            data_path = os.path.join(data_path, "dataset.yaml")
+        data_config = load_yaml_config(data_path)
+        names = data_config.get("names") if isinstance(data_config, dict) else None
+        if isinstance(names, list):
+            names = {index: name for index, name in enumerate(names)}
+        if not isinstance(names, dict) or not names:
+            raise ValueError("The dataset YAML does not contain class names.")
+
+        weights_dir = os.path.join(self.current_project_path, "weights")
+        os.makedirs(weights_dir, exist_ok=True)
+        task_type = self.selected_task_type.lower()
+        model_type = "yolov8" if task_type in {"detect", "classify"} else task_type
+        for weight_name in ("best.pt", "last.pt"):
+            weight_path = os.path.join(weights_dir, weight_name)
+            if not os.path.isfile(weight_path):
+                continue
+            model_config = {
+                "type": model_type,
+                "name": os.path.splitext(weight_name)[0],
+                "provider": "Ultralytics",
+                "display_name": f"{os.path.basename(self.current_project_path)} {os.path.splitext(weight_name)[0]}",
+                "model_path": weight_name,
+                "conf_threshold": 0.25,
+                "iou_threshold": 0.45,
+                "max_det": 300,
+                "classes": names,
+            }
+            save_yaml_config(
+                model_config,
+                os.path.join(weights_dir, weight_name.replace(".pt", ".yaml")),
+            )
 
     def start_selected_export(self, export_format):
         self.exported_onnx_path = None
